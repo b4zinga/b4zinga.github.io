@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-CN">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=6.6.0" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=6.6.0">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=6.6.0">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=6.6.0" color="#222">
+
+
+
+
+
+
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    version: '6.6.0',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="1. 内存取证工具volatility猜测dump文件的profile值12345678910111213141516root@kali:~/CTF# volatility -f mem.vmem imageinfoVolatility Foundation Volatility Framework 2.6INFO    : volatility.debug    : Determining pr">
+<meta name="keywords" content="内存取证,volatility">
+<meta property="og:type" content="article">
+<meta property="og:title" content="内存取证">
+<meta property="og:url" content="http://yoursite.com/2018/12/29/mem/index.html">
+<meta property="og:site_name" content="B4zinga&#39;s Notes">
+<meta property="og:description" content="1. 内存取证工具volatility猜测dump文件的profile值12345678910111213141516root@kali:~/CTF# volatility -f mem.vmem imageinfoVolatility Foundation Volatility Framework 2.6INFO    : volatility.debug    : Determining pr">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2018-12-28T16:46:30.115Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="内存取证">
+<meta name="twitter:description" content="1. 内存取证工具volatility猜测dump文件的profile值12345678910111213141516root@kali:~/CTF# volatility -f mem.vmem imageinfoVolatility Foundation Volatility Framework 2.6INFO    : volatility.debug    : Determining pr">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/12/29/mem/">
+
+
+
+<script type="text/javascript" id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>内存取证 | B4zinga's Notes</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style type="text/css">
+    .use-motion .motion-element,
+    .use-motion .brand,
+    .use-motion .menu-item,
+    .sidebar-inner,
+    .use-motion .post-block,
+    .use-motion .pagination,
+    .use-motion .comments,
+    .use-motion .post-header,
+    .use-motion .post-body,
+    .use-motion .collection-title { opacity: initial; }
+
+    .use-motion .logo,
+    .use-motion .site-title,
+    .use-motion .site-subtitle {
+      opacity: initial;
+      top: initial;
+    }
+
+    .use-motion {
+      .logo-line-before i { left: initial; }
+      .logo-line-after i { right: initial; }
+    }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-CN">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">B4zinga's Notes</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Just For Fun.</p>
+      
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="切换导航栏">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>首页</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-about">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/about/" rel="section"><i class="menu-item-icon fa fa-fw fa-user"></i> <br>关于</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>归档</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+  
+  
+  
+  
+
+  
+
+    <a href="https://github.com/b4zinga" class="github-corner" title="Follow me on GitHub" aria-label="Follow me on GitHub" rel="noopener" target="_blank"><svg width="80" height="80" viewbox="0 0 250 250" style="fill: #222; color: #fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"/><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"/><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"/></svg></a>
+
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/12/29/mem/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="b4zinga">
+      <meta itemprop="description" content="security and programming">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="B4zinga's Notes">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">内存取证
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+
+              
+                
+              
+
+              <time title="创建时间：2018-12-29 00:45:15 / 修改时间：00:46:30" itemprop="dateCreated datePublished" datetime="2018-12-29T00:45:15+08:00">2018-12-29</time>
+            
+
+            
+              
+
+              
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="1-内存取证工具volatility"><a href="#1-内存取证工具volatility" class="headerlink" title="1. 内存取证工具volatility"></a>1. 内存取证工具volatility</h2><h3 id="猜测dump文件的profile值"><a href="#猜测dump文件的profile值" class="headerlink" title="猜测dump文件的profile值"></a>猜测dump文件的profile值</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">root@kali:~/CTF<span class="comment"># volatility -f mem.vmem imageinfo</span></span><br><span class="line">Volatility Foundation Volatility Framework 2.6</span><br><span class="line">INFO    : volatility.debug    : Determining profile based on KDBG search...</span><br><span class="line">          Suggested Profile(s) : WinXPSP2x86, WinXPSP3x86 (Instantiated with WinXPSP2x86)</span><br><span class="line">                     AS Layer1 : IA32PagedMemoryPae (Kernel AS)</span><br><span class="line">                     AS Layer2 : FileAddressSpace (/root/CTF/mem.vmem)</span><br><span class="line">                      PAE <span class="built_in">type</span> : PAE</span><br><span class="line">                           DTB : 0xb18000L</span><br><span class="line">                          KDBG : 0x80546ae0L</span><br><span class="line">          Number of Processors : 1</span><br><span class="line">     Image Type (Service Pack) : 3</span><br><span class="line">                KPCR <span class="keyword">for</span> CPU 0 : 0xffdff000L</span><br><span class="line">             KUSER_SHARED_DATA : 0xffdf0000L</span><br><span class="line">           Image date and time : 2016-05-03 04:41:19 UTC+0000</span><br><span class="line">     Image <span class="built_in">local</span> date and time : 2016-05-03 12:41:19 +0800</span><br><span class="line">root@kali:~/CTF<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+<p>看到，profile可能是WinXPSP2x86</p>
+<h3 id="直接获取volshell"><a href="#直接获取volshell" class="headerlink" title="直接获取volshell"></a>直接获取volshell</h3><p>shell的命令： </p>
+<p>dt(“内核关键数据结构名称””) </p>
+<p>如: <code>dt(&quot;_PEB&quot;)</code></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line">root@kali:~/CTF<span class="comment"># volatility -f mem.vmem --profile=WinXPSP2x86 volshell</span></span><br><span class="line">Volatility Foundation Volatility Framework 2.6</span><br><span class="line">Current context: System @ 0x821b9830, pid=4, ppid=0 DTB=0xb18000</span><br><span class="line">Welcome to volshell! Current memory image is:</span><br><span class="line">file:///root/CTF/mem.vmem</span><br><span class="line">To get <span class="built_in">help</span>, <span class="built_in">type</span> <span class="string">'hh()'</span></span><br><span class="line">&gt;&gt;&gt; dt(<span class="string">"_PEB"</span>)</span><br><span class="line"> <span class="string">'_PEB'</span> (528 bytes)</span><br><span class="line">0x0   : InheritedAddressSpace          [<span class="string">'unsigned char'</span>]</span><br><span class="line">0x1   : ReadImageFileExecOptions       [<span class="string">'unsigned char'</span>]</span><br><span class="line">0x2   : BeingDebugged                  [<span class="string">'unsigned char'</span>]</span><br><span class="line">0x3   : SpareBool                      [<span class="string">'unsigned char'</span>]</span><br><span class="line">0x4   : Mutant                         [<span class="string">'pointer'</span>, [<span class="string">'void'</span>]]</span><br><span class="line">0x8   : ImageBaseAddress               [<span class="string">'pointer'</span>, [<span class="string">'void'</span>]]</span><br><span class="line">0xc   : Ldr                            [<span class="string">'pointer'</span>, [<span class="string">'_PEB_LDR_DATA'</span>]]</span><br><span class="line">0x10  : ProcessParameters              [<span class="string">'pointer'</span>, [<span class="string">'_RTL_USER_PROCESS_PARAMETERS'</span>]]</span><br><span class="line">0x14  : SubSystemData                  [<span class="string">'pointer'</span>, [<span class="string">'void'</span>]]</span><br><span class="line">0x18  : ProcessHeap                    [<span class="string">'pointer'</span>, [<span class="string">'void'</span>]]</span><br><span class="line">0x1c  : FastPebLock                    [<span class="string">'pointer'</span>, [<span class="string">'_RTL_CRITICAL_SECTION'</span>]]</span><br><span class="line">0x20  : FastPebLockRoutine             [<span class="string">'pointer'</span>, [<span class="string">'void'</span>]]</span><br><span class="line">0x24  : FastPebUnlockRoutine           [<span class="string">'pointer'</span>, [<span class="string">'void'</span>]]</span><br><span class="line">0x28  : EnvironmentUpdateCount         [<span class="string">'unsigned long'</span>]</span><br><span class="line">0x2c  : KernelCallbackTable            [<span class="string">'pointer'</span>, [<span class="string">'void'</span>]]</span><br><span class="line">0x30  : SystemReserved                 [<span class="string">'array'</span>, 1, [<span class="string">'unsigned long'</span>]]</span><br><span class="line">0x34  : AtlThunkSListPtr32             [<span class="string">'unsigned long'</span>]</span><br><span class="line">0x38  : FreeList                       [<span class="string">'pointer'</span>, [<span class="string">'_PEB_FREE_BLOCK'</span>]]</span><br><span class="line">0x3c  : TlsExpansionCounter            [<span class="string">'unsigned long'</span>]</span><br><span class="line">0x40  : TlsBitmap                      [<span class="string">'pointer'</span>, [<span class="string">'void'</span>]]</span><br><span class="line">0x44  : TlsBitmapBits                  [<span class="string">'array'</span>, 2, [<span class="string">'unsigned long'</span>]]</span><br><span class="line">0x4c  : ReadOnlySharedMemoryBase       [<span class="string">'pointer'</span>, [<span class="string">'void'</span>]]</span><br><span class="line">0x50  : ReadOnlySharedMemoryHeap       [<span class="string">'pointer'</span>, [<span class="string">'void'</span>]]</span><br><span class="line">0x54  : ReadOnlyStaticServerData       [<span class="string">'pointer'</span>, [<span class="string">'pointer'</span>, [<span class="string">'void'</span>]]]</span><br><span class="line">0x58  : AnsiCodePageData               [<span class="string">'pointer'</span>, [<span class="string">'void'</span>]]</span><br><span class="line">0x5c  : OemCodePageData                [<span class="string">'pointer'</span>, [<span class="string">'void'</span>]]</span><br><span class="line">0x60  : UnicodeCaseTableData           [<span class="string">'pointer'</span>, [<span class="string">'void'</span>]]</span><br><span class="line">0x64  : NumberOfProcessors             [<span class="string">'unsigned long'</span>]</span><br><span class="line">0x68  : NtGlobalFlag                   [<span class="string">'unsigned long'</span>]</span><br><span class="line">0x70  : CriticalSectionTimeout         [<span class="string">'_LARGE_INTEGER'</span>]</span><br><span class="line">0x78  : HeapSegmentReserve             [<span class="string">'unsigned long'</span>]</span><br><span class="line">0x7c  : HeapSegmentCommit              [<span class="string">'unsigned long'</span>]</span><br><span class="line">0x80  : HeapDeCommitTotalFreeThreshold [<span class="string">'unsigned long'</span>]</span><br><span class="line">0x84  : HeapDeCommitFreeBlockThreshold [<span class="string">'unsigned long'</span>]</span><br><span class="line">0x88  : NumberOfHeaps                  [<span class="string">'unsigned long'</span>]</span><br><span class="line">0x8c  : MaximumNumberOfHeaps           [<span class="string">'unsigned long'</span>]</span><br><span class="line">0x90  : ProcessHeaps                   [<span class="string">'pointer'</span>, [<span class="string">'array'</span>, &lt;<span class="keyword">function</span> &lt;lambda&gt; at 0x7f88d57decf8&gt;, [<span class="string">'pointer'</span>, [<span class="string">'_HEAP'</span>]]]]</span><br><span class="line">0x94  : GdiSharedHandleTable           [<span class="string">'pointer'</span>, [<span class="string">'void'</span>]]</span><br><span class="line">0x98  : ProcessStarterHelper           [<span class="string">'pointer'</span>, [<span class="string">'void'</span>]]</span><br><span class="line">0x9c  : GdiDCAttributeList             [<span class="string">'unsigned long'</span>]</span><br><span class="line">0xa0  : LoaderLock                     [<span class="string">'pointer'</span>, [<span class="string">'void'</span>]]</span><br><span class="line">0xa4  : OSMajorVersion                 [<span class="string">'unsigned long'</span>]</span><br><span class="line">0xa8  : OSMinorVersion                 [<span class="string">'unsigned long'</span>]</span><br><span class="line">0xac  : OSBuildNumber                  [<span class="string">'unsigned short'</span>]</span><br><span class="line">0xae  : OSCSDVersion                   [<span class="string">'unsigned short'</span>]</span><br><span class="line">0xb0  : OSPlatformId                   [<span class="string">'unsigned long'</span>]</span><br><span class="line">0xb4  : ImageSubsystem                 [<span class="string">'unsigned long'</span>]</span><br><span class="line">0xb8  : ImageSubsystemMajorVersion     [<span class="string">'unsigned long'</span>]</span><br><span class="line">0xbc  : ImageSubsystemMinorVersion     [<span class="string">'unsigned long'</span>]</span><br><span class="line">0xc0  : ImageProcessAffinityMask       [<span class="string">'unsigned long'</span>]</span><br><span class="line">0xc4  : GdiHandleBuffer                [<span class="string">'array'</span>, 34, [<span class="string">'unsigned long'</span>]]</span><br><span class="line">0x14c : PostProcessInitRoutine         [<span class="string">'pointer'</span>, [<span class="string">'void'</span>]]</span><br><span class="line">0x150 : TlsExpansionBitmap             [<span class="string">'pointer'</span>, [<span class="string">'void'</span>]]</span><br><span class="line">0x154 : TlsExpansionBitmapBits         [<span class="string">'array'</span>, 32, [<span class="string">'unsigned long'</span>]]</span><br><span class="line">0x1d4 : SessionId                      [<span class="string">'unsigned long'</span>]</span><br><span class="line">0x1d8 : AppCompatFlags                 [<span class="string">'_ULARGE_INTEGER'</span>]</span><br><span class="line">0x1e0 : AppCompatFlagsUser             [<span class="string">'_ULARGE_INTEGER'</span>]</span><br><span class="line">0x1e8 : pShimData                      [<span class="string">'pointer'</span>, [<span class="string">'void'</span>]]</span><br><span class="line">0x1ec : AppCompatInfo                  [<span class="string">'pointer'</span>, [<span class="string">'void'</span>]]</span><br><span class="line">0x1f0 : CSDVersion                     [<span class="string">'_UNICODE_STRING'</span>]</span><br><span class="line">0x1f8 : ActivationContextData          [<span class="string">'pointer'</span>, [<span class="string">'void'</span>]]</span><br><span class="line">0x1fc : ProcessAssemblyStorageMap      [<span class="string">'pointer'</span>, [<span class="string">'void'</span>]]</span><br><span class="line">0x200 : SystemDefaultActivationContextData [<span class="string">'pointer'</span>, [<span class="string">'void'</span>]]</span><br><span class="line">0x204 : SystemAssemblyStorageMap       [<span class="string">'pointer'</span>, [<span class="string">'void'</span>]]</span><br><span class="line">0x208 : MinimumStackCommit             [<span class="string">'unsigned long'</span>]</span><br><span class="line">&gt;&gt;&gt;</span><br></pre></td></tr></table></figure>
+<h3 id="查看进程："><a href="#查看进程：" class="headerlink" title="查看进程："></a>查看进程：</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">root@kali:~/CTF<span class="comment"># </span></span><br><span class="line">root@kali:~/CTF<span class="comment"># volatility -f mem.vmem --profile=WinXPSP2x86 pslist</span></span><br><span class="line">Volatility Foundation Volatility Framework 2.6</span><br><span class="line">Offset(V)  Name                    PID   PPID   Thds     Hnds   Sess  Wow64 Start                          Exit                          </span><br><span class="line">---------- -------------------- ------ ------ ------ -------- ------ ------ ------------------------------ ------------------------------</span><br><span class="line">0x821b9830 System                    4      0     62      253 ------      0                                                              </span><br><span class="line">0x81fb9210 smss.exe                552      4      3       19 ------      0 2016-05-03 04:32:10 UTC+0000                                 </span><br><span class="line">0x81c14da0 csrss.exe               616    552     10      328      0      0 2016-05-03 04:32:12 UTC+0000                                 </span><br><span class="line">0x81f81880 winlogon.exe            640    552     18      449      0      0 2016-05-03 04:32:12 UTC+0000                                 </span><br><span class="line">0x8208fda0 services.exe            684    640     16      260      0      0 2016-05-03 04:32:12 UTC+0000                                 </span><br><span class="line">0x81c32b10 lsass.exe               696    640     18      333      0      0 2016-05-03 04:32:12 UTC+0000                                 </span><br><span class="line">0x820a19a0 vmacthlp.exe            852    684      1       25      0      0 2016-05-03 04:32:13 UTC+0000                                 </span><br><span class="line">0x81c30458 svchost.exe             864    684     18      201      0      0 2016-05-03 04:32:13 UTC+0000                                 </span><br><span class="line">0x81c67020 svchost.exe             948    684     11      238      0      0 2016-05-03 04:32:13 UTC+0000                                 </span><br><span class="line">0x81ce7da0 svchost.exe            1040    684     55     1103      0      0 2016-05-03 04:32:13 UTC+0000                                 </span><br><span class="line">0x81c25020 svchost.exe            1096    684      4       66      0      0 2016-05-03 04:32:13 UTC+0000                                 </span><br><span class="line">0x82002b28 svchost.exe            1256    684     13      194      0      0 2016-05-03 04:32:14 UTC+0000                                 </span><br><span class="line">0x81f6c988 explorer.exe           1464   1448     12      329      0      0 2016-05-03 04:32:14 UTC+0000                                 </span><br><span class="line">0x82085550 spoolsv.exe            1576    684     13      140      0      0 2016-05-03 04:32:14 UTC+0000                                 </span><br><span class="line">0x81f64560 vmtoolsd.exe           1712   1464      5      145      0      0 2016-05-03 04:32:15 UTC+0000                                 </span><br><span class="line">0x820a3528 ctfmon.exe             1736   1464      1       78      0      0 2016-05-03 04:32:15 UTC+0000                                 </span><br><span class="line">0x81f7d3c0 vmtoolsd.exe           2020    684      7      273      0      0 2016-05-03 04:32:23 UTC+0000                                 </span><br><span class="line">0x8207db28 TPAutoConnSvc.e         512    684      5       99      0      0 2016-05-03 04:32:25 UTC+0000                                 </span><br><span class="line">0x81c26da0 alg.exe                1212    684      6      105      0      0 2016-05-03 04:32:26 UTC+0000                                 </span><br><span class="line">0x81f715c0 wscntfy.exe            1392   1040      1       39      0      0 2016-05-03 04:32:26 UTC+0000                                 </span><br><span class="line">0x81e1f520 TPAutoConnect.e        1972    512      1       72      0      0 2016-05-03 04:32:26 UTC+0000                                 </span><br><span class="line">0x81f9d3e8 TrueCrypt.exe          2012   1464      2      139      0      0 2016-05-03 04:33:36 UTC+0000                                 </span><br><span class="line">root@kali:~/CTF<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+<h3 id="查看缓存在内存的注册表"><a href="#查看缓存在内存的注册表" class="headerlink" title="查看缓存在内存的注册表"></a>查看缓存在内存的注册表</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">root@kali:~/CTF<span class="comment"># volatility -f mem.vmem --profile=WinXPSP2x86 hivelist</span></span><br><span class="line">Volatility Foundation Volatility Framework 2.6</span><br><span class="line">Virtual    Physical   Name</span><br><span class="line">---------- ---------- ----</span><br><span class="line">0xe1e9f9d8 0x0bf169d8 \Device\HarddiskVolume1\Documents and Settings\Administrator\Local Settings\Application Data\Microsoft\Windows\UsrClass.dat</span><br><span class="line">0xe1cee5d0 0x0be075d0 \Device\HarddiskVolume1\Documents and Settings\Administrator\NTUSER.DAT</span><br><span class="line">0xe1b99b60 0x0ae0ab60 \Device\HarddiskVolume1\Documents and Settings\LocalService\Local Settings\Application Data\Microsoft\Windows\UsrClass.dat</span><br><span class="line">0xe1b95008 0x0adc6008 \Device\HarddiskVolume1\Documents and Settings\LocalService\NTUSER.DAT</span><br><span class="line">0xe1a7c2a8 0x0a76b2a8 \Device\HarddiskVolume1\Documents and Settings\NetworkService\Local Settings\Application Data\Microsoft\Windows\UsrClass.dat</span><br><span class="line">0xe1a72b60 0x0a6e1b60 \Device\HarddiskVolume1\Documents and Settings\NetworkService\NTUSER.DAT</span><br><span class="line">0xe146c398 0x084a3398 \Device\HarddiskVolume1\WINDOWS\system32\config\software</span><br><span class="line">0xe1699758 0x08246758 \Device\HarddiskVolume1\WINDOWS\system32\config\default</span><br><span class="line">0xe166faa8 0x05e7eaa8 \Device\HarddiskVolume1\WINDOWS\system32\config\SECURITY</span><br><span class="line">0xe16aab60 0x082a6b60 \Device\HarddiskVolume1\WINDOWS\system32\config\SAM</span><br><span class="line">0xe12e9008 0x02d7f008 [no name]</span><br><span class="line">0xe1035b60 0x02b08b60 \Device\HarddiskVolume1\WINDOWS\system32\config\system</span><br><span class="line">0xe102e008 0x02b02008 [no name]</span><br><span class="line">root@kali:~/CTF<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+<h3 id="hivedump-打印出注册表中的数据-："><a href="#hivedump-打印出注册表中的数据-：" class="headerlink" title="hivedump 打印出注册表中的数据 ："></a>hivedump 打印出注册表中的数据 ：</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line">root@kali:~/CTF<span class="comment"># volatility -f mem.vmem --profile=WinXPSP2x86 hivedump -o 0xe16aab60</span></span><br><span class="line">Volatility Foundation Volatility Framework 2.6</span><br><span class="line">Last Written         Key</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\Domains</span><br><span class="line">2016-05-03 03:51:02 UTC+0000 \SAM\SAM\Domains\Account</span><br><span class="line">2016-05-03 03:50:51 UTC+0000 \SAM\SAM\Domains\Account\Aliases</span><br><span class="line">2016-05-03 03:51:02 UTC+0000 \SAM\SAM\Domains\Account\Aliases\000003E9</span><br><span class="line">2016-05-03 03:51:02 UTC+0000 \SAM\SAM\Domains\Account\Aliases\Members</span><br><span class="line">2016-05-03 03:51:02 UTC+0000 \SAM\SAM\Domains\Account\Aliases\Members\S-1-5-21-1844237615-1677128483-1801674531</span><br><span class="line">2016-05-03 03:51:02 UTC+0000 \SAM\SAM\Domains\Account\Aliases\Members\S-1-5-21-1844237615-1677128483-1801674531\000003EA</span><br><span class="line">2016-05-03 03:50:51 UTC+0000 \SAM\SAM\Domains\Account\Aliases\Names</span><br><span class="line">2016-05-03 03:50:51 UTC+0000 \SAM\SAM\Domains\Account\Aliases\Names\HelpServicesGroup</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\Domains\Account\Groups</span><br><span class="line">2016-05-03 03:51:02 UTC+0000 \SAM\SAM\Domains\Account\Groups\00000201</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\Domains\Account\Groups\Names</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\Domains\Account\Groups\Names\None</span><br><span class="line">2016-05-03 03:51:02 UTC+0000 \SAM\SAM\Domains\Account\Users</span><br><span class="line">2016-05-03 04:32:14 UTC+0000 \SAM\SAM\Domains\Account\Users\000001F4</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\Domains\Account\Users\000001F5</span><br><span class="line">2016-05-03 03:50:15 UTC+0000 \SAM\SAM\Domains\Account\Users\000003E8</span><br><span class="line">2016-05-03 03:51:02 UTC+0000 \SAM\SAM\Domains\Account\Users\000003EA</span><br><span class="line">2016-05-03 03:51:02 UTC+0000 \SAM\SAM\Domains\Account\Users\Names</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\Domains\Account\Users\Names\Administrator</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\Domains\Account\Users\Names\Guest</span><br><span class="line">2016-05-03 03:50:15 UTC+0000 \SAM\SAM\Domains\Account\Users\Names\HelpAssistant</span><br><span class="line">2016-05-03 03:51:02 UTC+0000 \SAM\SAM\Domains\Account\Users\Names\SUPPORT_388945a0</span><br><span class="line">2016-05-03 03:42:51 UTC+0000 \SAM\SAM\Domains\Builtin</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\Domains\Builtin\Aliases</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\Domains\Builtin\Aliases\00000220</span><br><span class="line">2016-05-03 03:42:51 UTC+0000 \SAM\SAM\Domains\Builtin\Aliases\00000221</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\Domains\Builtin\Aliases\00000222</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\Domains\Builtin\Aliases\00000223</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\Domains\Builtin\Aliases\00000227</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\Domains\Builtin\Aliases\00000228</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\Domains\Builtin\Aliases\0000022B</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\Domains\Builtin\Aliases\0000022C</span><br><span class="line">2016-05-03 03:42:51 UTC+0000 \SAM\SAM\Domains\Builtin\Aliases\Members</span><br><span class="line">2016-05-03 03:42:51 UTC+0000 \SAM\SAM\Domains\Builtin\Aliases\Members\S-1-5</span><br><span class="line">2016-05-03 03:42:51 UTC+0000 \SAM\SAM\Domains\Builtin\Aliases\Members\S-1-5\00000004</span><br><span class="line">2016-05-03 03:42:51 UTC+0000 \SAM\SAM\Domains\Builtin\Aliases\Members\S-1-5\0000000B</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\Domains\Builtin\Aliases\Members\S-1-5-21-1844237615-1677128483-1801674531</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\Domains\Builtin\Aliases\Members\S-1-5-21-1844237615-1677128483-1801674531\000001F4</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\Domains\Builtin\Aliases\Members\S-1-5-21-1844237615-1677128483-1801674531\000001F5</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\Domains\Builtin\Aliases\Names</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\Domains\Builtin\Aliases\Names\Administrators</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\Domains\Builtin\Aliases\Names\Backup Operators</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\Domains\Builtin\Aliases\Names\Guests</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\Domains\Builtin\Aliases\Names\Network Configuration Operators</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\Domains\Builtin\Aliases\Names\Power Users</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\Domains\Builtin\Aliases\Names\Remote Desktop Users</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\Domains\Builtin\Aliases\Names\Replicator</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\Domains\Builtin\Aliases\Names\Users</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\Domains\Builtin\Groups</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\Domains\Builtin\Groups\Names</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\Domains\Builtin\Users</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\Domains\Builtin\Users\Names</span><br><span class="line">2016-05-03 03:41:48 UTC+0000 \SAM\SAM\RXACT</span><br><span class="line">root@kali:~/CTF<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+<h3 id="获取SAM表中的用户"><a href="#获取SAM表中的用户" class="headerlink" title="获取SAM表中的用户"></a>获取SAM表中的用户</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">root@kali:~/CTF<span class="comment"># volatility -f mem.vmem --profile=WinXPSP2x86 printkey -K "SAM\Domains\Account\Users\Names"</span></span><br><span class="line">Volatility Foundation Volatility Framework 2.6</span><br><span class="line">Legend: (S) = Stable   (V) = Volatile</span><br><span class="line"></span><br><span class="line">----------------------------</span><br><span class="line">Registry: \Device\HarddiskVolume1\WINDOWS\system32\config\SAM</span><br><span class="line">Key name: Names (S)</span><br><span class="line">Last updated: 2016-05-03 03:51:02 UTC+0000</span><br><span class="line"></span><br><span class="line">Subkeys:</span><br><span class="line">  (S) Administrator</span><br><span class="line">  (S) Guest</span><br><span class="line">  (S) HelpAssistant</span><br><span class="line">  (S) SUPPORT_388945a0</span><br><span class="line"></span><br><span class="line">Values:</span><br><span class="line">REG_NONE                      : (S) </span><br><span class="line"></span><br><span class="line">root@kali:~/CTF<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+<h3 id="获取最后登录系统的账户"><a href="#获取最后登录系统的账户" class="headerlink" title="获取最后登录系统的账户"></a>获取最后登录系统的账户</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">volatility -f mem.vmem –profile=WinXPSP2x86 printkey -K <span class="string">"SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"</span></span><br></pre></td></tr></table></figure>
+<h3 id="提取出内存中记录的-当时正在运行的程序有哪些，运行过多少次，最后一次运行的时间等信息"><a href="#提取出内存中记录的-当时正在运行的程序有哪些，运行过多少次，最后一次运行的时间等信息" class="headerlink" title="提取出内存中记录的 当时正在运行的程序有哪些，运行过多少次，最后一次运行的时间等信息"></a>提取出内存中记录的 当时正在运行的程序有哪些，运行过多少次，最后一次运行的时间等信息</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br></pre></td><td class="code"><pre><span class="line">root@kali:~/CTF<span class="comment"># volatility -f mem.vmem --profile=WinXPSP2x86 userassist</span></span><br><span class="line">Volatility Foundation Volatility Framework 2.6</span><br><span class="line">----------------------------</span><br><span class="line">Registry: \Device\HarddiskVolume1\Documents and Settings\Administrator\NTUSER.DAT </span><br><span class="line">Path: Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\&#123;5E6AB780-7743-11CF-A12B-00AA004AE837&#125;\Count</span><br><span class="line">Last updated: 2016-05-03 04:31:34 UTC+0000</span><br><span class="line"></span><br><span class="line">Subkeys:</span><br><span class="line"></span><br><span class="line">Values:</span><br><span class="line"></span><br><span class="line">REG_BINARY    UEME_CTLSESSION : Raw Data:</span><br><span class="line">0x00000000  9c 27 8d 0e 01 00 00 00                           .<span class="string">'......</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">REG_BINARY    UEME_CTLCUACount:ctor : </span></span><br><span class="line"><span class="string">ID:             1</span></span><br><span class="line"><span class="string">Count:          2</span></span><br><span class="line"><span class="string">Last updated:   1970-01-01 00:00:00 UTC+0000</span></span><br><span class="line"><span class="string">Raw Data:</span></span><br><span class="line"><span class="string">0x00000000  01 00 00 00 02 00 00 00 00 00 00 00 00 00 00 00   ................</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">REG_BINARY    UEME_UITOOLBAR  : </span></span><br><span class="line"><span class="string">ID:             1</span></span><br><span class="line"><span class="string">Count:          5</span></span><br><span class="line"><span class="string">Last updated:   2016-05-03 04:31:34 UTC+0000</span></span><br><span class="line"><span class="string">Raw Data:</span></span><br><span class="line"><span class="string">0x00000000  01 00 00 00 0a 00 00 00 50 d4 8a ac f4 a4 d1 01   ........P.......</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">REG_BINARY    UEME_UITOOLBAR:0x4,7031 : </span></span><br><span class="line"><span class="string">ID:             1</span></span><br><span class="line"><span class="string">Count:          3</span></span><br><span class="line"><span class="string">Last updated:   2016-05-03 04:30:11 UTC+0000</span></span><br><span class="line"><span class="string">Raw Data:</span></span><br><span class="line"><span class="string">0x00000000  01 00 00 00 08 00 00 00 30 de 54 7b f4 a4 d1 01   ........0.T&#123;....</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">REG_BINARY    UEME_UITOOLBAR:0x1,120 : </span></span><br><span class="line"><span class="string">ID:             1</span></span><br><span class="line"><span class="string">Count:          2</span></span><br><span class="line"><span class="string">Last updated:   2016-05-03 04:31:34 UTC+0000</span></span><br><span class="line"><span class="string">Raw Data:</span></span><br><span class="line"><span class="string">0x00000000  01 00 00 00 07 00 00 00 50 d4 8a ac f4 a4 d1 01   ........P.......</span></span><br><span class="line"><span class="string">----------------------------</span></span><br><span class="line"><span class="string">Registry: \Device\HarddiskVolume1\Documents and Settings\Administrator\NTUSER.DAT </span></span><br><span class="line"><span class="string">Path: Software\Microsoft\Windows\CurrentVersion\Explorer\UserAssist\&#123;75048700-EF1F-11D0-9888-006097DEACF9&#125;\Count</span></span><br><span class="line"><span class="string">Last updated: 2016-05-03 04:33:36 UTC+0000</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">Subkeys:</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">Values:</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">REG_BINARY    UEME_CTLSESSION : Raw Data:</span></span><br><span class="line"><span class="string">0x00000000  7b 27 8d 0e 01 00 00 00                           &#123;'</span>......</span><br><span class="line"></span><br><span class="line">REG_BINARY    UEME_RUNPIDL:%csidl2%\Windows Media Player.lnk : </span><br><span class="line">ID:             1</span><br><span class="line">Count:          14</span><br><span class="line">Last updated:   2016-05-03 03:52:39 UTC+0000</span><br><span class="line">Raw Data:</span><br><span class="line">0x00000000  01 00 00 00 13 00 00 00 f0 b1 09 3d ef a4 d1 01   ...........=....</span><br><span class="line"></span><br><span class="line">REG_BINARY    UEME_RUNPIDL:%csidl2%\Windows Messenger.lnk : </span><br><span class="line">ID:             1</span><br><span class="line">Count:          13</span><br><span class="line">Last updated:   2016-05-03 03:52:39 UTC+0000</span><br><span class="line">Raw Data:</span><br><span class="line">0x00000000  01 00 00 00 12 00 00 00 f0 b1 09 3d ef a4 d1 01   ...........=....</span><br><span class="line"></span><br><span class="line">REG_BINARY    U               : </span><br><span class="line">ID:             1</span><br><span class="line">Count:          12</span><br><span class="line">Last updated:   2016-05-03 03:52:39 UTC+0000</span><br><span class="line">Raw Data:</span><br><span class="line">0x00000000  01 00 00 00 11 00 00 00 f0 b1 09 3d ef a4 d1 01   ...........=....</span><br><span class="line"></span><br><span class="line">REG_BINARY    U               : </span><br><span class="line">ID:             1</span><br><span class="line">Count:          11</span><br><span class="line">Last updated:   2016-05-03 03:52:39 UTC+0000</span><br><span class="line">Raw Data:</span><br><span class="line">0x00000000  01 00 00 00 10 00 00 00 f0 b1 09 3d ef a4 d1 01   ...........=....</span><br><span class="line"></span><br><span class="line">REG_BINARY    UEME_CTLCUACount:ctor : </span><br><span class="line">ID:             1</span><br><span class="line">Count:          2</span><br><span class="line">Last updated:   1970-01-01 00:00:00 UTC+0000</span><br><span class="line">Raw Data:</span><br><span class="line">0x00000000  01 00 00 00 02 00 00 00 00 00 00 00 00 00 00 00   ................</span><br><span class="line"></span><br><span class="line">REG_BINARY    UEME_RUNCPL     : </span><br><span class="line">ID:             1</span><br><span class="line">Count:          1</span><br><span class="line">Last updated:   2016-05-03 04:09:17 UTC+0000</span><br><span class="line">Raw Data:</span><br><span class="line">0x00000000  01 00 00 00 06 00 00 00 f0 cc 99 8f f1 a4 d1 01   ................</span><br><span class="line"></span><br><span class="line">REG_BINARY    UEME_RUNCPL:desk.cpl : </span><br><span class="line">ID:             1</span><br><span class="line">Count:          1</span><br><span class="line">Last updated:   2016-05-03 04:09:17 UTC+0000</span><br><span class="line">Raw Data:</span><br><span class="line">0x00000000  01 00 00 00 06 00 00 00 f0 cc 99 8f f1 a4 d1 01   ................</span><br><span class="line"></span><br><span class="line">REG_BINARY    UEME_UISCUT     : </span><br><span class="line">ID:             1</span><br><span class="line">Count:          8</span><br><span class="line">Last updated:   2016-05-03 04:33:35 UTC+0000</span><br><span class="line">Raw Data:</span><br><span class="line">0x00000000  01 00 00 00 0d 00 00 00 20 a5 ec f4 f4 a4 d1 01   ................</span><br><span class="line"></span><br><span class="line">REG_BINARY    UEME_RUNPATH    : </span><br><span class="line">ID:             1</span><br><span class="line">Count:          13</span><br><span class="line">Last updated:   2016-05-03 04:33:36 UTC+0000</span><br><span class="line">Raw Data:</span><br><span class="line">0x00000000  01 00 00 00 12 00 00 00 70 53 2f f5 f4 a4 d1 01   ........pS/.....</span><br><span class="line"></span><br><span class="line">REG_BINARY    U               : </span><br><span class="line">ID:             1</span><br><span class="line">Count:          1</span><br><span class="line">Last updated:   2016-05-03 04:21:44 UTC+0000</span><br><span class="line">Raw Data:</span><br><span class="line">0x00000000  01 00 00 00 06 00 00 00 c0 18 b5 4c f3 a4 d1 01   ...........L....</span><br><span class="line"></span><br><span class="line">REG_BINARY    UEME_RUNPATH:TrueCrypt.lnk : </span><br><span class="line">ID:             1</span><br><span class="line">Count:          3</span><br><span class="line">Last updated:   2016-05-03 04:33:35 UTC+0000</span><br><span class="line">Raw Data:</span><br><span class="line">0x00000000  01 00 00 00 08 00 00 00 10 ef ee f4 f4 a4 d1 01   ................</span><br><span class="line"></span><br><span class="line">REG_BINARY    UEME_RUNPATH:C:\Program Files\TrueCrypt\TrueCrypt.exe : </span><br><span class="line">ID:             1</span><br><span class="line">Count:          3</span><br><span class="line">Last updated:   2016-05-03 04:33:36 UTC+0000</span><br><span class="line">Raw Data:</span><br><span class="line">0x00000000  01 00 00 00 08 00 00 00 70 53 2f f5 f4 a4 d1 01   ........pS/.....</span><br><span class="line"></span><br><span class="line">REG_BINARY    U               : </span><br><span class="line">ID:             1</span><br><span class="line">Count:          1</span><br><span class="line">Last updated:   2016-05-03 04:24:19 UTC+0000</span><br><span class="line">Raw Data:</span><br><span class="line">0x00000000  01 00 00 00 06 00 00 00 b0 70 51 a9 f3 a4 d1 01   .........pQ.....</span><br><span class="line"></span><br><span class="line">REG_BINARY    UEME_RUNPATH:C:\WINDOWS\system32\NOTEPAD.EXE : </span><br><span class="line">ID:             1</span><br><span class="line">Count:          5</span><br><span class="line">Last updated:   2016-05-03 04:29:24 UTC+0000</span><br><span class="line">Raw Data:</span><br><span class="line">0x00000000  01 00 00 00 0a 00 00 00 b0 cb 4e 5f f4 a4 d1 01   ..........N_....</span><br><span class="line">root@kali:~/CTF<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+<h3 id="将内存中的某个进程数据以-dmp-的格式保存出来"><a href="#将内存中的某个进程数据以-dmp-的格式保存出来" class="headerlink" title="将内存中的某个进程数据以 dmp 的格式保存出来"></a>将内存中的某个进程数据以 dmp 的格式保存出来</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">root@kali:~/CTF<span class="comment"># mkdir ctfmon</span></span><br><span class="line">root@kali:~/CTF<span class="comment"># volatility -f mem.vmem --profile=WinXPSP2x86 memdump -p 1736 -D ctfmon/</span></span><br><span class="line">Volatility Foundation Volatility Framework 2.6</span><br><span class="line">************************************************************************</span><br><span class="line">Writing ctfmon.exe [  1736] to 1736.dmp</span><br><span class="line">root@kali:~/CTF<span class="comment"># ls</span></span><br><span class="line">ctfmon  mem.vmem  suspicion</span><br><span class="line">root@kali:~/CTF<span class="comment"># cd ctfmon/</span></span><br><span class="line">root@kali:~/CTF/ctfmon<span class="comment"># ls</span></span><br><span class="line">1736.dmp</span><br><span class="line">root@kali:~/CTF/ctfmon<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+<p>后续可以使用16进制编辑器分析，或使用strings提取其中的字符串分析。</p>
+<h3 id="提取内存中保留的-cmd-命令使用情况-。"><a href="#提取内存中保留的-cmd-命令使用情况-。" class="headerlink" title="提取内存中保留的 cmd 命令使用情况 。"></a>提取内存中保留的 cmd 命令使用情况 。</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">root@kali:~/CTF<span class="comment"># volatility -f mem.vmem --profile=WinXPSP2x86 cmdscan</span></span><br><span class="line">Volatility Foundation Volatility Framework 2.6</span><br><span class="line">**************************************************</span><br><span class="line">CommandProcess: csrss.exe Pid: 616</span><br><span class="line">CommandHistory: 0x55cc00 Application: TPAutoConnect.exe Flags: Allocated</span><br><span class="line">CommandCount: 0 LastAdded: -1 LastDisplayed: -1</span><br><span class="line">FirstCommand: 0 CommandCountMax: 50</span><br><span class="line">ProcessHandle: 0x628</span><br><span class="line">Cmd <span class="comment">#19 @ 0xe300f7: ?????????????????????????????????????????????????????????????? </span></span><br><span class="line">????<span class="string">'+7;GKW|??????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????????</span></span><br><span class="line"><span class="string">root@kali:~/CTF#</span></span><br></pre></td></tr></table></figure>
+<h3 id="查看当时网络连接情况"><a href="#查看当时网络连接情况" class="headerlink" title="查看当时网络连接情况"></a>查看当时网络连接情况</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">root@kali:~/CTF<span class="comment"># volatility -f mem.vmem --profile=WinXPSP2x86 netscan</span></span><br><span class="line">Volatility Foundation Volatility Framework 2.6</span><br><span class="line">ERROR   : volatility.debug    : This <span class="built_in">command</span> does not support the profile WinXPSP2x86</span><br><span class="line">root@kali:~/CTF<span class="comment">#</span></span><br></pre></td></tr></table></figure>
+<h3 id="获取-IE-浏览器的使用情况"><a href="#获取-IE-浏览器的使用情况" class="headerlink" title="获取 IE 浏览器的使用情况"></a>获取 IE 浏览器的使用情况</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">volatility -f mem.vmem --profile=WinXPSP2x86 iehistory</span><br></pre></td></tr></table></figure>
+<h3 id="获取内存中的系统密码"><a href="#获取内存中的系统密码" class="headerlink" title="获取内存中的系统密码"></a>获取内存中的系统密码</h3><p>获取内存中的系统密码，我们可以使用 hashdump 将它提取出来 。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ubuntu@DESKTOP-RO316QM:/mnt/d$ volatility -f easy_dump.img --profile=Win7SP1x64 hashdump</span><br><span class="line">Volatility Foundation Volatility Framework 2.6</span><br><span class="line">Administrator:500:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::</span><br><span class="line">Guest:501:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::</span><br><span class="line">n3k0:1000:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::</span><br><span class="line">ubuntu@DESKTOP-RO316QM:/mnt/d$</span><br></pre></td></tr></table></figure>
+<p>或者：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">volatility -f mem.vmem –profile=WinXPSP2x86 hashdump -y （注册表 system 的 virtual 地址 ）-s （SAM 的 virtual 地址）</span><br><span class="line"></span><br><span class="line">root@kali:~/CTF<span class="comment"># volatility -f mem.vmem --profile=WinXPSP2x86 hivelist</span></span><br><span class="line">Volatility Foundation Volatility Framework 2.6</span><br><span class="line">Virtual    Physical   Name</span><br><span class="line">---------- ---------- ----</span><br><span class="line">0xe1e9f9d8 0x0bf169d8 \Device\HarddiskVolume1\Documents and Settings\Administrator\Local Settings\Application Data\Microsoft\Windows\UsrClass.dat</span><br><span class="line">0xe1cee5d0 0x0be075d0 \Device\HarddiskVolume1\Documents and Settings\Administrator\NTUSER.DAT</span><br><span class="line">0xe1b99b60 0x0ae0ab60 \Device\HarddiskVolume1\Documents and Settings\LocalService\Local Settings\Application Data\Microsoft\Windows\UsrClass.dat</span><br><span class="line">0xe1b95008 0x0adc6008 \Device\HarddiskVolume1\Documents and Settings\LocalService\NTUSER.DAT</span><br><span class="line">0xe1a7c2a8 0x0a76b2a8 \Device\HarddiskVolume1\Documents and Settings\NetworkService\Local Settings\Application Data\Microsoft\Windows\UsrClass.dat</span><br><span class="line">0xe1a72b60 0x0a6e1b60 \Device\HarddiskVolume1\Documents and Settings\NetworkService\NTUSER.DAT</span><br><span class="line">0xe146c398 0x084a3398 \Device\HarddiskVolume1\WINDOWS\system32\config\software</span><br><span class="line">0xe1699758 0x08246758 \Device\HarddiskVolume1\WINDOWS\system32\config\default</span><br><span class="line">0xe166faa8 0x05e7eaa8 \Device\HarddiskVolume1\WINDOWS\system32\config\SECURITY</span><br><span class="line">0xe16aab60 0x082a6b60 \Device\HarddiskVolume1\WINDOWS\system32\config\SAM</span><br><span class="line">0xe12e9008 0x02d7f008 [no name]</span><br><span class="line">0xe1035b60 0x02b08b60 \Device\HarddiskVolume1\WINDOWS\system32\config\system</span><br><span class="line">0xe102e008 0x02b02008 [no name]</span><br><span class="line">root@kali:~/CTF<span class="comment"># </span></span><br><span class="line">root@kali:~/CTF<span class="comment"># volatility -f mem.vmem --profile=WinXPSP2x86 hashdump -y 0xe1035b60 -s 0xe16aab60</span></span><br><span class="line">Volatility Foundation Volatility Framework 2.6</span><br></pre></td></tr></table></figure>
+<h3 id="timeliner"><a href="#timeliner" class="headerlink" title="timeliner"></a>timeliner</h3><p>最大程度上将内存中的信息提取出来，那么你可以使用 timeliner 这个插件。它会从多个位置来收集系统的活动信息 </p>
+<p>volatility -f mem.vmem –profile=WinXPSP2x86 timeliner</p>
+<h3 id="查找镜像中的文件"><a href="#查找镜像中的文件" class="headerlink" title="查找镜像中的文件"></a>查找镜像中的文件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">ubuntu@DESKTOP-RO316QM:/mnt/d$ volatility -f easy_dump.img --profile=Win7SP1x64 filescan | grep  -E <span class="string">'jpg|png|jpeg|bmp|gif'</span></span><br><span class="line">Volatility Foundation Volatility Framework 2.6</span><br><span class="line">0x000000002408c460     32      0 RW---- \Device\HarddiskVolume1\phos.jpg</span><br><span class="line">ubuntu@DESKTOP-RO316QM:/mnt/d$</span><br></pre></td></tr></table></figure>
+<h3 id="Linux下命令"><a href="#Linux下命令" class="headerlink" title="Linux下命令"></a>Linux下命令</h3><p>可以通过linux_route_cache参数查看路由表情况<br>使用linux_lsof命令查看1517和27157进程相关的文件<br>使用linux_netstat查看网络链接情况。<br>使用linux_psaux检查进程详细信息<br>使用linux_proc_maps参数，可以查看进程细节包括共享库、开始和结束的位置等信息<br>使用linux_find_file查看可疑文件的位置</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">Processes</span><br><span class="line">linux_pslist</span><br><span class="line">linux_psaux</span><br><span class="line">linux_pstree</span><br><span class="line">linux_pslist_cache</span><br><span class="line">linux_pidhashtable</span><br><span class="line">linux_psxview</span><br><span class="line">linux_lsof</span><br><span class="line">Process Memory</span><br><span class="line">linux_memmap</span><br><span class="line">linux_proc_maps</span><br><span class="line">linux_dump_map</span><br><span class="line">linux_bash</span><br><span class="line">Kernel Memory and Objects</span><br><span class="line">linux_lsmod</span><br><span class="line">linux_moddump</span><br><span class="line">linux_tmpfs</span><br><span class="line">Rootkit Detection</span><br><span class="line">linux_check_afinfo</span><br><span class="line">linux_check_tty</span><br><span class="line">linux_keyboard_notifier</span><br><span class="line">linux_check_creds</span><br><span class="line">linux_check_fop</span><br><span class="line">linux_check_idt</span><br><span class="line">linux_check_syscall</span><br><span class="line">linux_check_modules</span><br><span class="line">linux_check_creds</span><br><span class="line">Networking</span><br><span class="line">linux_arp</span><br><span class="line">linux_ifconfig</span><br><span class="line">linux_route_cache</span><br><span class="line">linux_netstat</span><br><span class="line">linux_pkt_queues</span><br><span class="line">linux_sk_buff_cache</span><br><span class="line">System Information</span><br><span class="line">linux_cpuinfo</span><br><span class="line">linux_dmesg</span><br><span class="line">linux_iomem</span><br><span class="line">linux_slabinfo</span><br><span class="line">linux_mount</span><br><span class="line">linux_mount_cache</span><br><span class="line">linux_dentry_cache</span><br><span class="line">linux_find_file</span><br><span class="line">linux_vma_cache</span><br><span class="line">Miscellaneous</span><br><span class="line">linux_volshell</span><br><span class="line">linux_yarascan</span><br></pre></td></tr></table></figure>
+<h2 id="2-foremost"><a href="#2-foremost" class="headerlink" title="2. foremost"></a>2. foremost</h2><p>Foremost是基于文件开始格式，文件结束标志和内部数据结构进行恢复文件的程序。</p>
+<p>foremost命令参数英文中文说明：</p>
+<p>$ foremost [-v|-V|-h|-T|-Q|-q|-a|-w-d] [-t <type>] [-s <blocks>] [-k <size>]<br>    [-b <size>] [-c <file>] [-o <dir>] [-i &lt;file] </dir></file></size></size></blocks></type></p>
+<p>-V  - 显示版权信息并退出<br>-t  - 指定文件类型.  (-t jpeg,pdf …)<br>-d  -打开间接块检测 (针对UNIX文件系统)<br>-i  - 指定输入文件 (默认为标准输入)<br>-a  - 写入所有的文件头部, 不执行错误检测(损坏文件)<br>-w  - 向磁盘写入审计文件，不写入任何检测到的文件<br>-o  - 设置输出目录 (默认为为输出)<br>-c  - 设置配置文件 (默认为 foremost.conf)<br>-q  - 启用快速模式. 在512字节边界执行搜索.<br>-Q  - 启用安静模式. 禁用输出消息.<br>-v  - 详细模式. 向屏幕上记录所有消息。</p>
+<h3 id="foremost-扫描误删文件"><a href="#foremost-扫描误删文件" class="headerlink" title="foremost 扫描误删文件"></a>foremost 扫描误删文件</h3><p>如果误删一个png文件，可以 <code>foremost -t png -i /dev/sda1</code></p>
+<h3 id="恢复内存中dump出的文件"><a href="#恢复内存中dump出的文件" class="headerlink" title="恢复内存中dump出的文件"></a>恢复内存中dump出的文件</h3><p>先用volatility提取出对应pid的进程的数据，然后<code>foremost 2616.dump</code></p>
+<h2 id="3-binwalk"><a href="#3-binwalk" class="headerlink" title="3. binwalk"></a>3. binwalk</h2><p>递归提取 <code>binwalk -Me firmware.bin</code><br>自动化（自动）提取 <code>binwalk -e firmware.bin</code></p>
+<p><a href="https://www.freebuf.com/column/152545.html" target="_blank" rel="noopener">https://www.freebuf.com/column/152545.html</a><br><a href="https://www.freebuf.com/articles/system/26763.html" target="_blank" rel="noopener">https://www.freebuf.com/articles/system/26763.html</a><br><a href="https://www.freebuf.com/articles/rookie/145262.html" target="_blank" rel="noopener">https://www.freebuf.com/articles/rookie/145262.html</a><br><a href="https://bbs.ichunqiu.com/thread-46827-1-1.html" target="_blank" rel="noopener">https://bbs.ichunqiu.com/thread-46827-1-1.html</a></p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+       
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/内存取证/" rel="tag"><i class="fa fa-tag"></i> 内存取证</a>
+          
+            <a href="/tags/volatility/" rel="tag"><i class="fa fa-tag"></i> volatility</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/12/29/Linux-firewall/" rel="prev" title="Linux 防火墙配置">
+                Linux 防火墙配置 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.png" alt="b4zinga">
+            
+              <p class="site-author-name" itemprop="name">b4zinga</p>
+              <p class="site-description motion-element" itemprop="description">security and programming</p>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">2</span>
+                    <span class="site-state-item-name">日志</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">3</span>
+                    <span class="site-state-item-name">标签</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+            <div class="links-of-author motion-element">
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="https://github.com/b4zinga" title="GitHub &rarr; https://github.com/b4zinga" rel="noopener" target="_blank"><i class="fa fa-fw fa-github"></i>GitHub</a>
+                </span>
+              
+                <span class="links-of-author-item">
+                  
+                  
+                    
+                  
+                  
+                    
+                  
+                  <a href="mailto:b4zinga@outlook.com" title="E-Mail &rarr; mailto:b4zinga@outlook.com" rel="noopener" target="_blank"><i class="fa fa-fw fa-envelope"></i>E-Mail</a>
+                </span>
+              
+            </div>
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-内存取证工具volatility"><span class="nav-number">1.</span> <span class="nav-text">1. 内存取证工具volatility</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#猜测dump文件的profile值"><span class="nav-number">1.1.</span> <span class="nav-text">猜测dump文件的profile值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#直接获取volshell"><span class="nav-number">1.2.</span> <span class="nav-text">直接获取volshell</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看进程："><span class="nav-number">1.3.</span> <span class="nav-text">查看进程：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看缓存在内存的注册表"><span class="nav-number">1.4.</span> <span class="nav-text">查看缓存在内存的注册表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#hivedump-打印出注册表中的数据-："><span class="nav-number">1.5.</span> <span class="nav-text">hivedump 打印出注册表中的数据 ：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#获取SAM表中的用户"><span class="nav-number">1.6.</span> <span class="nav-text">获取SAM表中的用户</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#获取最后登录系统的账户"><span class="nav-number">1.7.</span> <span class="nav-text">获取最后登录系统的账户</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#提取出内存中记录的-当时正在运行的程序有哪些，运行过多少次，最后一次运行的时间等信息"><span class="nav-number">1.8.</span> <span class="nav-text">提取出内存中记录的 当时正在运行的程序有哪些，运行过多少次，最后一次运行的时间等信息</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#将内存中的某个进程数据以-dmp-的格式保存出来"><span class="nav-number">1.9.</span> <span class="nav-text">将内存中的某个进程数据以 dmp 的格式保存出来</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#提取内存中保留的-cmd-命令使用情况-。"><span class="nav-number">1.10.</span> <span class="nav-text">提取内存中保留的 cmd 命令使用情况 。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查看当时网络连接情况"><span class="nav-number">1.11.</span> <span class="nav-text">查看当时网络连接情况</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#获取-IE-浏览器的使用情况"><span class="nav-number">1.12.</span> <span class="nav-text">获取 IE 浏览器的使用情况</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#获取内存中的系统密码"><span class="nav-number">1.13.</span> <span class="nav-text">获取内存中的系统密码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#timeliner"><span class="nav-number">1.14.</span> <span class="nav-text">timeliner</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查找镜像中的文件"><span class="nav-number">1.15.</span> <span class="nav-text">查找镜像中的文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Linux下命令"><span class="nav-number">1.16.</span> <span class="nav-text">Linux下命令</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-foremost"><span class="nav-number">2.</span> <span class="nav-text">2. foremost</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#foremost-扫描误删文件"><span class="nav-number">2.1.</span> <span class="nav-text">foremost 扫描误删文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#恢复内存中dump出的文件"><span class="nav-number">2.2.</span> <span class="nav-text">恢复内存中dump出的文件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-binwalk"><span class="nav-number">3.</span> <span class="nav-text">3. binwalk</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">b4zinga</span>
+
+  
+
+  
+</div>
+<!--
+
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> v6.6.0</div>
+
+
+
+-->
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+	
+    
+
+    
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=6.6.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=6.6.0"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=6.6.0"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=6.6.0"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=6.6.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=6.6.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=6.6.0"></script>
+
+
+
+  
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
